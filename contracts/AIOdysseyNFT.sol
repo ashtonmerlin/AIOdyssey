@@ -24,6 +24,7 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
     AINFTToken public aiNFTToken;
     mapping(address => uint256) public userMintCount;
     mapping(bytes32 => bool) public usedUri;
+    mapping(address => mapping(address => bool)) public referenced;
 
     struct TokenDistribution {
         uint256 refereeAmount;
@@ -43,7 +44,7 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
     constructor(address signer_, address airdropToken_) ERC721("The AI Odyssey", "AIONFT") {
         tokenDistributionConfig.defaultMintAmount = 5000 * 1e18;
         tokenDistributionConfig.firstMintAmount = 10000 * 1e18;
-        tokenDistributionConfig.refereeAmount = 1000 * 1e18;
+        tokenDistributionConfig.refereeAmount = 5000 * 1e18;
         signer = signer_;
         aiNFTToken = AINFTToken(airdropToken_);
     }
@@ -73,7 +74,8 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
         } else {
             aiNFTToken.mint(minter, tokenDistributionConfig.defaultMintAmount);
         }
-        if (referee != address(0x0) && referee != minter) {
+        if (referee != address(0x0) && referee != minter && !referenced[minter][referee]) {
+            referenced[minter][referee] = true;
             aiNFTToken.mint(referee, tokenDistributionConfig.refereeAmount);
         }
     }

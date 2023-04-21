@@ -3134,6 +3134,7 @@ pragma solidity ^0.8.9;
 
 
 
+
 contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
     using Counters for Counters.Counter;
     error InvalidMintPrice(uint256);
@@ -3158,11 +3159,16 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
     uint256 public mintPrice;
     address public signer;
 
-    constructor(address signer_) ERC721("AIOdysseyNFT", "AIONFT") {
+    event UpdateMintPrice(uint256 oldPrice, uint256 newPrice);
+    event UpdateSigner(address oldSigner, address newSigner);
+    event ConfigureTokenDistribution(TokenDistribution oldConfig, TokenDistribution newConfig);
+
+    constructor(address signer_, address airdropToken_) ERC721("The AI Odyssey", "AIONFT") {
         tokenDistributionConfig.defaultMintAmount = 5000 * 1e18;
         tokenDistributionConfig.firstMintAmount = 10000 * 1e18;
         tokenDistributionConfig.refereeAmount = 1000 * 1e18;
         signer = signer_;
+        aiNFTToken = AINFTToken(airdropToken_);
     }
 
     function pause() external onlyOwner {
@@ -3181,9 +3187,9 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
         address minter = msg.sender;
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
+        userMintCount[minter] = userMintCount[minter] + 1;
         _safeMint(minter, tokenId);
         _setTokenURI(tokenId, uri);
-        userMintCount[minter] = userMintCount[minter] + 1;
 
         if (userMintCount[minter] == 1) {
             aiNFTToken.mint(minter, tokenDistributionConfig.firstMintAmount);
@@ -3202,14 +3208,26 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
         usedUri[uriHash] = true;
     }
 
-    function configureTokenDistribution(uint128 firstMintAmount, uint128 defaultMintAmount, uint256 refereeAmount) external onlyOwner {
-        tokenDistributionConfig.firstMintAmount = firstMintAmount;
-        tokenDistributionConfig.defaultMintAmount = defaultMintAmount;
-        tokenDistributionConfig.refereeAmount = refereeAmount;
+    function configureTokenDistribution(TokenDistribution calldata newTokenDistributionConfig) external onlyOwner {
+        emit ConfigureTokenDistribution(tokenDistributionConfig, newTokenDistributionConfig);
+
+        tokenDistributionConfig = newTokenDistributionConfig;
     }
 
     function updateSigner(address newSigner) external onlyOwner {
+        emit UpdateSigner(signer, newSigner);
+
         signer = newSigner;
+    }
+
+    function updateMintPrice(uint256 newMintPrice) external onlyOwner {
+        emit UpdateMintPrice(mintPrice, newMintPrice);
+
+        mintPrice = newMintPrice;
+    }
+
+    function withdraw(address payable to) external onlyOwner {
+        Address.sendValue(to, address(this).balance);
     }
 
     /**
@@ -3269,4 +3287,6 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
     {
         return super.supportsInterface(interfaceId);
     }
+
+    receive() external payable {}
 }

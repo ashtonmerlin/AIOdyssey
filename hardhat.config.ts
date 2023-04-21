@@ -41,6 +41,22 @@ const config: HardhatUserConfig = {
       url: node_url('bsc'),
       accounts: accounts()
     },
+    arbTest: {
+      url: node_url('bscTest'),
+      accounts: accounts()
+    },
+    arb: {
+      url: node_url('bsc'),
+      accounts: accounts()
+    },
+    opTest: {
+      url: node_url('bscTest'),
+      accounts: accounts()
+    },
+    op: {
+      url: node_url('bsc'),
+      accounts: accounts()
+    },
     goerli: {
       url: node_url('goerli'),
       accounts: accounts(),

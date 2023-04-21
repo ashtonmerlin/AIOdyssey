@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "./AINFTToken.sol";
@@ -102,6 +103,10 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
         mintPrice = newMintPrice;
     }
 
+    function withdraw(address payable to) external onlyOwner {
+        Address.sendValue(to, address(this).balance);
+    }
+
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
@@ -159,4 +164,6 @@ contract AIOdysseyNFT is ERC721, ERC721Enumerable, Pausable, Ownable {
     {
         return super.supportsInterface(interfaceId);
     }
+
+    receive() external payable {}
 }

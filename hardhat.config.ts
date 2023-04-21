@@ -65,6 +65,10 @@ const config: HardhatUserConfig = {
       url: node_url('avax'),
       accounts: accounts()
     },
+    eth: {
+      url: node_url('eth'),
+      accounts: accounts()
+    },
     goerli: {
       url: node_url('goerli'),
       accounts: accounts(),
